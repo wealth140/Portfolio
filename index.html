@@ -125,6 +125,7 @@
             border-radius: 50%;
             background: #68dfa7;
             box-shadow: 0 0 12px rgba(104, 223, 167, .6);
+            animation: status-pulse 2.4s ease-in-out infinite;
         }
         .availability::before { display: none; }
         .hero h1 {
@@ -158,7 +159,8 @@
         .text-link { display: inline-flex; align-items: center; gap: 9px; color: #d1d6e2; font-size: 12px; }
         .text-link span { color: #83a6ff; transition: transform .2s ease; }
         .text-link:hover span { transform: translate(3px, -3px); }
-        .hero-visual { position: relative; display: grid; min-height: 365px; place-items: center; }
+        .hero-content { animation: hero-enter .8s cubic-bezier(.2, .7, .2, 1) both; }
+        .hero-visual { position: relative; display: grid; min-height: 365px; place-items: center; animation: hero-enter .9s .12s cubic-bezier(.2, .7, .2, 1) both; }
         .orbit {
             position: absolute;
             width: min(360px, 95%);
@@ -177,6 +179,7 @@
             background: #3565d5;
             filter: blur(100px);
             opacity: .42;
+            animation: glow-pulse 7s ease-in-out infinite;
         }
         .code-card {
             position: relative;
@@ -187,6 +190,7 @@
             background: linear-gradient(145deg, rgba(23, 29, 44, .96), rgba(11, 14, 22, .98));
             box-shadow: 0 30px 100px rgba(0, 0, 0, .45), 0 0 70px rgba(70, 121, 255, .1);
             transform: rotate(-3deg);
+            animation: card-float 6s ease-in-out 1s infinite;
         }
         .code-card-top { display: flex; height: 43px; align-items: center; gap: 6px; padding: 0 15px; border-bottom: 1px solid rgba(255, 255, 255, .08); }
         .window-dot { width: 6px; height: 6px; border-radius: 50%; background: #566070; }
@@ -212,8 +216,16 @@
             box-shadow: 0 14px 35px rgba(0, 0, 0, .25);
             color: #cdd3e0;
             font: 10px var(--mono);
+            animation: note-float 4s ease-in-out infinite;
         }
         .floating-note strong { color: #83a7ff; font-weight: 500; }
+        .scroll-reveal { opacity: 0; transform: translateY(20px); transition: opacity .65s ease, transform .65s cubic-bezier(.2, .7, .2, 1); }
+        .scroll-reveal.is-visible { opacity: 1; transform: translateY(0); }
+        @keyframes hero-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes status-pulse { 50% { box-shadow: 0 0 18px rgba(104, 223, 167, .95); } }
+        @keyframes glow-pulse { 50% { opacity: .58; transform: scale(1.12); } }
+        @keyframes card-float { 50% { transform: translateY(-7px) rotate(-3deg); } }
+        @keyframes note-float { 50% { transform: translateY(-5px); } }
         .hero-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 70px; color: #818899; font: 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
         .hero-foot .scroll-cue { display: flex; align-items: center; gap: 10px; }
         .scroll-cue::before { width: 22px; height: 1px; background: var(--blue); content: ""; }
@@ -595,6 +607,26 @@
         });
 
         document.querySelector("#year").textContent = new Date().getFullYear();
+
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window) {
+            const revealElements = document.querySelectorAll(
+                ".section-heading, .project-card, .about-grid > *, .service-card, .process-step, .contact-panel"
+            );
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("is-visible");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: "0px 0px -32px 0px" });
+
+            revealElements.forEach((element, index) => {
+                element.classList.add("scroll-reveal");
+                element.style.transitionDelay = `${(index % 4) * 80}ms`;
+                revealObserver.observe(element);
+            });
+        }
     </script>
 </body>
 </html>
